@@ -1,0 +1,8 @@
+.env
+.env.local
+pgdata/
+data/videos.json
+__pycache__
+*.pyc
+venv/
+.env
