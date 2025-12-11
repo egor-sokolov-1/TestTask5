@@ -17,8 +17,8 @@ git clone
 # 2. Скачай JSON с данными - положи в папку data/videos.json
 
 # 3. Вставь свои токены в .env:
-#    - TELEGRAM_TOKEN - получи у @BotFather
-#    - GROQ_API_KEY - бесплатно на https://console.groq.com/keys
+     - TELEGRAM_TOKEN - получи у @BotFather
+     - GROQ_API_KEY - бесплатно на https://console.groq.com/keys
 
 # 4. Запусти всё одной командой
 docker compose up --build -d
