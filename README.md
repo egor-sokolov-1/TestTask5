@@ -13,6 +13,9 @@
 git clone 
 
 ### 1. Создай .env файл в корне проекта 
+     TELEGRAM_TOKEN=XXXX
+     GROQ_API_KEY=XXXX
+     DATABASE_URL=postgresql://postgres:postgres@db:5432/video_analytics
 
 ### 2. Скачай JSON с данными - положи в папку data/videos.json
 
