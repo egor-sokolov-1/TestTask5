@@ -12,18 +12,18 @@
 
 git clone 
 
-# 1. Создай .env файл в корне проекта 
+### 1. Создай .env файл в корне проекта 
 
-# 2. Скачай JSON с данными - положи в папку data/videos.json
+### 2. Скачай JSON с данными - положи в папку data/videos.json
 
-# 3. Вставь свои токены в .env:
+### 3. Вставь свои токены в .env:
      - TELEGRAM_TOKEN - получи у @BotFather
      - GROQ_API_KEY - бесплатно на https://console.groq.com/keys
 
-# 4. Запусти всё одной командой
+### 4. Запусти всё одной командой
 docker compose up --build -d
 
-# 5. Загрузи данные в базу
+### 5. Загрузи данные в базу
 docker exec -it video-analytics-bot-bot-1 python load_data.py
 
 # Архитектура и подход к NLP to SQL
