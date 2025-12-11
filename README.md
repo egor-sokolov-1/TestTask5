@@ -13,14 +13,12 @@
 git clone 
 
 ### 1. Создай .env файл в корне проекта 
-    TELEGRAM_TOKEN=XXX
-    GROQ_API_KEY=XXX
-    DATABASE_URL=postgresql://postgres:postgres@db:5432/video_analytics
+
 ### 2. Скачай JSON с данными - положи в папку data/videos.json
 
 ### 3. Вставь свои токены в .env:
-    - TELEGRAM_TOKEN - получи у @BotFather
-    - GROQ_API_KEY - бесплатно на https://console.groq.com/keys
+     - TELEGRAM_TOKEN - получи у @BotFather
+     - GROQ_API_KEY - бесплатно на https://console.groq.com/keys
 
 ### 4. Запусти всё одной командой
 docker compose up --build -d
@@ -39,4 +37,4 @@ System промпт с few shot примерами
 На таком маленьком домене (2 таблицы) даже Llama с температурой 0 и хорошими примерами выдаёт корректный SQL
 Groq даёт скорость примерно 600 токенов/сек - ответ за 100–200 мс
 Всё в одном промпте
-Ключевой файл: llm.py - там промпт
+Ключевой файл: llm.py — там промпт
