@@ -26,7 +26,7 @@ docker compose up --build -d
 ### 5. Загрузи данные в базу
 docker exec -it video-analytics-bot-bot-1 python load_data.py
 
-# Архитектура и подход к NLP to SQL
+## Архитектура и подход к NLP to SQL
 Используем LLM (Llama Groq) 
 System промпт с few shot примерами
 Температура = 0 - модель не галлюцинирует
