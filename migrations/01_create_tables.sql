@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS videos (
-    id              BIGINT PRIMARY KEY,
-    creator_id      BIGINT NOT NULL,
+    id              TEXT PRIMARY KEY,                    
+    creator_id      TEXT NOT NULL,                       
     video_created_at TIMESTAMPTZ NOT NULL,
     views_count     BIGINT NOT NULL DEFAULT 0,
     likes_count     BIGINT NOT NULL DEFAULT 0,
@@ -9,8 +9,8 @@ CREATE TABLE IF NOT EXISTS videos (
 );
 
 CREATE TABLE IF NOT EXISTS video_snapshots (
-    id                    BIGINT PRIMARY KEY,
-    video_id              BIGINT NOT NULL REFERENCES videos(id) ON DELETE CASCADE,
+    id                    TEXT PRIMARY KEY,             
+    video_id              TEXT NOT NULL REFERENCES videos(id) ON DELETE CASCADE,
     views_count           BIGINT NOT NULL DEFAULT 0,
     likes_count           BIGINT NOT NULL DEFAULT 0,
     comments_count        BIGINT NOT NULL DEFAULT 0,

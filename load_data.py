@@ -1,49 +1,70 @@
 import json
 import asyncio
 import os
-from db import init_pool, pool  
-from dotenv import load_dotenv
+from datetime import datetime
+from db import get_pool
 
-load_dotenv()
-DATABASE_URL = os.getenv("DATABASE_URL")
+if not os.path.exists("data/videos.json"):
+    print("ОШИБКА: положи data/videos.json в корень проекта!")
+    exit(1)
+
+def parse_datetime(s: str):
+    """Парсим ISO-формат с таймзоной и без"""
+    if not s:
+        return None
+    if s.endswith("Z"):
+        s = s[:-1] + "+00:00"
+    return datetime.fromisoformat(s.replace("Z", "+00:00"))
 
 async def load():
-    await init_pool()  
+    pool = await get_pool()
 
     with open("data/videos.json", "r", encoding="utf-8") as f:
-        videos = json.load(f)
+        data = json.load(f)
+
+    videos = data["videos"] if isinstance(data, dict) and "videos" in data else data
+
+    print(f"Загружаем {len(videos)} видео...")
 
     async with pool.acquire() as conn:
         async with conn.transaction():
-            for video in videos:
+            for i, video in enumerate(videos, 1):
+                video_created_at = parse_datetime(video['video_created_at'])
+
                 await conn.execute("""
-                    INSERT INTO videos 
-                    (id, creator_id, video_created_at, views_count, likes_count, comments_count, reports_count)
-                    VALUES ($1, $2, $3, $4, $5, $6, $7)
+                    INSERT INTO videos (id, creator_id, video_created_at, views_count, likes_count, comments_count, reports_count)
+                    VALUES ($1,$2,$3,$4,$5,$6,$7)
                     ON CONFLICT (id) DO UPDATE SET
                         views_count = EXCLUDED.views_count,
                         likes_count = EXCLUDED.likes_count,
                         comments_count = EXCLUDED.comments_count,
                         reports_count = EXCLUDED.reports_count;
-                """, video['id'], video['creator_id'], video['video_created_at'],
-                   video['views_count'], video['likes_count'],
-                   video['comments_count'], video['reports_count'])
+                """,
+                video['id'], video['creator_id'], video_created_at,
+                video['views_count'], video['likes_count'],
+                video['comments_count'], video['reports_count'])
 
                 for snap in video.get('snapshots', []):
+                    snap_created_at = parse_datetime(snap['created_at'])
+
                     await conn.execute("""
-                        INSERT INTO video_snapshots 
+                        INSERT INTO video_snapshots
                         (id, video_id, views_count, likes_count, comments_count, reports_count,
-                         delta_views_count, delta_likes_count, delta_comments_count, delta_reports_count,
-                         created_at)
+                         delta_views_count, delta_likes_count, delta_comments_count, delta_reports_count, created_at)
                         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
                         ON CONFLICT (id) DO NOTHING;
-                    """, snap['id'], video['id'],
-                       snap['views_count'], snap['likes_count'], snap['comments_count'], snap['reports_count'],
-                       snap.get('delta_views_count', 0), snap.get('delta_likes_count', 0),
-                       snap.get('delta_comments_count', 0), snap.get('delta_reports_count', 0),
-                       snap['created_at'])
+                    """,
+                    
+                    snap['id'], video['id'],
+                    snap.get('views_count',0), snap.get('likes_count',0),
+                    snap.get('comments_count',0), snap.get('reports_count',0),
+                    snap.get('delta_views_count',0), snap.get('delta_likes_count',0),
+                    snap.get('delta_comments_count',0), snap.get('delta_reports_count',0),
+                    snap_created_at
+                    )
 
-    print("Данные успешно загружены")
+                if i % 50 == 0:
+                    print(f"Загружено {i} видео...")
 
 if __name__ == "__main__":
     asyncio.run(load())
