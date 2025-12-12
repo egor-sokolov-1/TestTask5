@@ -17,7 +17,7 @@ SYSTEM_PROMPT = """
 videos (
     id TEXT PRIMARY KEY,
     creator_id TEXT NOT NULL,
-    video_created_at TIMESTAMPTZ NOT NULL,   -- дата и время публикации видео
+    video_created_at TIMESTAMPTZ NOT NULL,
     views_count BIGINT
 )
 
@@ -28,55 +28,48 @@ video_snapshots (
     delta_views_count BIGINT
 )
 
-Твоя задача: по любому запросу на русском языке вернуть ТОЛЬКО один правильный SQL-запрос, который возвращает ровно одно число.
+Твоя задача: по запросу на русском языке вернуть ТОЛЬКО один правильный SQL-запрос, возвращающий ровно одно число.
 
-КРИТИЧЕСКИ ВАЖНЫЕ ПРАВИЛА:
-- creator_id и id — строки в одинарных кавычках
-- "по 5 ноября 2025 включительно" = до конца дня 5 ноября = video_created_at < '2025-11-06 00:00:00+00'
-- "с 1 ноября 2025 по 5 ноября 2025 включительно" = от 2025-11-01 00:00:00 до 2025-11-05 23:59:59:999
-- используй: video_created_at >= '2025-11-01 00:00:00+00' AND video_created_at < '2025-11-06 00:00:00+00'
+ОБЯЗАТЕЛЬНЫЕ ПРАВИЛА:
+- creator_id — строка в одинарных кавычках
+- "по итоговой статистике" = из таблицы videos
+- "больше 10 000" или "больше 10000" = views_count > 10000
+- "с 1 по 5 ноября включительно" = video_created_at >= '2025-11-01' AND video_created_at < '2025-11-06'
 
-Примеры (точно следуй им):
+ТОЧНЫЕ ПРИМЕРЫ (копируй стиль):
 
-Запрос: Сколько всего видео?
+Запрос: Сколько всего видео в системе?
 SQL: SELECT COUNT(*) FROM videos;
 
-Запрос: Сколько видео у креатора с id aca1061a9d324ecf8c3fa2bb32d7be63 набрали больше 10000 просмотров?
+Запрос: Сколько видео у креатора с id aca1061a9d324ecf8c3fa2bb32d7be63 набрали больше 10 000 просмотров по итоговой статистике?
+SQL: SELECT COUNT(*) FROM videos WHERE creator_id = 'aca1061a9d324ecf8c3fa2bb32d7be63' AND views_count > 10000;
+
+Запрос: Сколько видео у креатора с id aca1061a9d324ecf8c3fa2bb32d7be63 набрали больше 10000 просмотров по итоговой статистике?
 SQL: SELECT COUNT(*) FROM videos WHERE creator_id = 'aca1061a9d324ecf8c3fa2bb32d7be63' AND views_count > 10000;
 
 Запрос: Сколько видео опубликовал креатор с id 8b76e572635b400c9052286a56176e03 в период с 1 ноября 2025 по 5 ноября 2025 включительно?
 SQL: SELECT COUNT(*) FROM videos WHERE creator_id = '8b76e572635b400c9052286a56176e03' AND video_created_at >= '2025-11-01 00:00:00+00' AND video_created_at < '2025-11-06 00:00:00+00';
 
-Запрос: Сколько видео у креатора 8b76e572635b400c9052286a56176e03 вышло с 10 по 15 декабря 2025?
-SQL: SELECT COUNT(*) FROM videos WHERE creator_id = '8b76e572635b400c9052286a56176e03' AND video_created_at >= '2025-12-10 00:00:00+00' AND video_created_at < '2025-12-16 00:00:00+00';
-
 Запрос: На сколько просмотров выросли все видео 28 ноября 2025?
 SQL: SELECT COALESCE(SUM(delta_views_count), 0) FROM video_snapshots WHERE created_at >= '2025-11-28 00:00:00+00' AND created_at < '2025-11-29 00:00:00+00';
 
-Теперь запрос пользователя:
+Запрос пользователя:
 {query}
 
-ОТВЕТЬ ТОЛЬКО SQL. Без ```sql, без текста, без кавычек, только сам запрос.
+ОТВЕТЬ ТОЛЬКО САМИМ SQL-ЗАПРОСОМ. НИЧЕГО БОЛЬШЕ.
 """.strip()
 
 async def generate_sql(user_query: str) -> str:
-    try:
-        response = await client.chat.completions.create(
-            model=MODEL,
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPT.format(query=user_query)},
-                {"role": "user", "content": user_query}
-            ],
-            temperature=0.0,
-            max_tokens=300
-        )
-        sql = response.choices[0].message.content.strip()
-        sql = sql.replace("```sql", "").replace("```", "").strip()
-        
-        if not sql.upper().startswith("SELECT"):
-            raise ValueError("Не SQL")
-        
-        return sql
-    except Exception as e:
-        print(f"LLM ошибка: {e}")
-        return "SELECT 0"
+    response = await client.chat.completions.create(
+        model=MODEL,
+        messages=[
+            {"role": "system", "content": SYSTEM_PROMPT.format(query=user_query)},
+            {"role": "user", "content": user_query}
+        ],
+        temperature=0.0,
+        max_tokens=300
+    )
+    sql = response.choices[0].message.content.strip()
+    sql = sql.replace("```sql", "").replace("```", "").replace("SQL:", "").strip()
+    
+    return sql
