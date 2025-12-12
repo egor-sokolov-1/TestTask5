@@ -10,7 +10,8 @@
 
 ## Как запустить локально 
 
-git clone 
+git clone https://github.com/egor-sokolov-1/TestTask5.git
+cd TestTask5
 
 ### 1. Создай .env файл в корне проекта 
      TELEGRAM_TOKEN=XXXX
@@ -27,7 +28,7 @@ git clone
 docker compose up --build -d
 
 ### 5. Загрузи данные в базу
-docker exec -it video-analytics-bot-bot-1 python load_data.py
+docker exec -it testtask5-bot-1 python load_data.py
 
 ## Архитектура и подход к NLP to SQL
 Используем LLM (Llama Groq) 
