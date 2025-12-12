@@ -11,36 +11,21 @@ client = AsyncOpenAI(
 
 MODEL = "llama-3.1-70b-versatile"
 
-SYSTEM_PROMPT = """
-Ты эксперт PostgreSQL.
+SYSTEM_PROMPT = SYSTEM_PROMPT = """
+Ты генерируй ТОЛЬКО SQL, ничего больше.
 
-Таблица videos:
-- id TEXT
-- creator_id TEXT
-- video_created_at TIMESTAMPTZ
-- views_count BIGINT  -- это итоговая статистика
-
-Твоя задача — вернуть ТОЛЬКО SQL, который даёт одно число.
-
-ВАЖНО:
-- creator_id всегда в кавычках: 'aca1061a9d324ecf8c3fa2bb32d7be63'
-- "больше 10 000" или "больше 10000" = views_count > 10000
-
-ПРИМЕРЫ:
+Пример:
+Запрос: Сколько видео у креатора с id aca1061a9d324ecf8c3fa2bb32d7be63 набрали больше 10 000 просмотров по итоговой статистике?
+SQL: 
+SQL: SELECT COUNT(*) FROM videos WHERE creator_id = 'aca1061a9d324ecf8c3fa2bb32d7be63' AND views_count > 10000;
 
 Запрос: Сколько всего видео?
 SQL: SELECT COUNT(*) FROM videos;
 
-Запрос: Сколько видео у креатора с id aca1061a9d324ecf8c3fa2bb32d7be63 набрали больше 10 000 просмотров по итоговой статистике?
-SQL: SELECT COUNT(*) FROM videos WHERE creator_id = 'aca1061a9d324ecf8c3fa2bb32d7be63' AND views_count > 10000;
-
-Запрос: Сколько видео у креатора с id aca1061a9d324ecf8c3fa2bb32d7be63 набрали больше 10000 просмотров?
-SQL: SELECT COUNT(*) FROM videos WHERE creator_id = 'aca1061a9d324ecf8c3fa2bb32d7be63' AND views_count > 10000;
-
-Запрос пользователя:
+Теперь запрос:
 {query}
 
-ОТВЕТЬ ТОЛЬКО SQL. НИЧЕГО БОЛЬШЕ.
+Ответь только SQL.
 """.strip()
 
 async def generate_sql(user_query: str) -> str:
